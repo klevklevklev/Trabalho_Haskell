@@ -235,6 +235,25 @@ Ao final das 1000 iterações, os pesos `θ` aprendidos são impressos. Cada nú
 
 ## Como Rodar
 
+### Pré-requisitos (Windows)
+
+Antes de rodar pela primeira vez, é necessário instalar duas coisas:
+
+**1. GHCup** — instala o compilador Haskell (GHC), o gerenciador de pacotes (Cabal) e o MSYS2.
+Acesse `https://www.haskell.org/ghcup/` e siga as instruções para Windows.
+
+**2. OpenBLAS** — biblioteca de álgebra linear usada pelo `hmatrix`. Após instalar o GHCup, abra um terminal e execute:
+
+```
+C:\ghcup\msys64\usr\bin\pacman.exe -Sy --noconfirm mingw-w64-x86_64-openblas
+```
+
+Feito isso, feche e reabra o terminal para garantir que o PATH foi atualizado.
+
+---
+
+### Executando o projeto
+
 Abra um terminal na pasta do projeto e execute:
 
 ```
