@@ -30,7 +30,4 @@ Modo Terminal — roda 1000 iterações e imprime cada passo na tela:
 
 cabal run qbarchallenge -- terminal
 
-Se nenhum argumento for passado, o programa exibe as opções disponíveis:
-
-cabal run qbarchallenge
 
