@@ -27,4 +27,4 @@ data Mundo = Mundo { campo :: Campo, craque :: CraqueState } deriving (Show)
 data Jogada = Esquerda | Parado | Direita 
     deriving (Enum, Bounded, Eq, Show)
 
-type Jogo = StateT Mundo IO
+type Jogo a = State Mundo a

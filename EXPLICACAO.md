@@ -34,10 +34,13 @@ A cada passo, o agente escolhe uma de três ações:
 
 ```
 qbarchallenge/
-├── Types.hs    → Define os tipos de dados do jogo
-├── Physics.hs  → Simula a física (movimento, colisões, recompensas)
-├── Brain.hs    → Inteligência do agente (Q-Learning)
-└── Main.hs     → Orquestra tudo e roda o treino
+├── Types.hs      → Define os tipos de dados do jogo
+├── Physics.hs    → Simula a física (movimento, colisões, recompensas)
+├── Brain.hs      → Inteligência do agente (Q-Learning)
+├── Game.hs       → Executa um passo completo (ação + física + treino)
+├── Visual.hs     → Interface gráfica com a biblioteca Gloss
+├── Terminal.hs   → Saída em texto no terminal (modo clássico)
+└── Main.hs       → Ponto de entrada: escolhe o modo de execução
 ```
 
 ---
@@ -237,7 +240,7 @@ Ao final das 1000 iterações, os pesos `θ` aprendidos são impressos. Cada nú
 
 ### Pré-requisitos (Windows)
 
-Antes de rodar pela primeira vez, é necessário instalar duas coisas:
+Antes de rodar pela primeira vez, é necessário instalar três coisas:
 
 **1. GHCup** — instala o compilador Haskell (GHC), o gerenciador de pacotes (Cabal) e o MSYS2.
 Acesse `https://www.haskell.org/ghcup/` e siga as instruções para Windows.
@@ -248,23 +251,58 @@ Acesse `https://www.haskell.org/ghcup/` e siga as instruções para Windows.
 C:\ghcup\msys64\usr\bin\pacman.exe -Sy --noconfirm mingw-w64-x86_64-openblas
 ```
 
+**3. freeglut** — biblioteca de janelas usada pelo `gloss` para abrir a interface gráfica. Execute:
+
+```
+C:\ghcup\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-freeglut
+```
+
+Após instalar o freeglut, é necessário criar uma cópia do arquivo com o nome que o Gloss espera. Execute no PowerShell:
+
+```
+Copy-Item "C:\ghcup\msys64\mingw64\bin\libfreeglut.dll" "C:\ghcup\msys64\mingw64\bin\freeglut.dll"
+```
+
 Feito isso, feche e reabra o terminal para garantir que o PATH foi atualizado.
 
 ---
 
 ### Executando o projeto
 
-Abra um terminal na pasta do projeto e execute:
+Abra um terminal na pasta do projeto e escolha um dos dois modos:
 
+**Modo Visual** — abre uma janela gráfica com animação em tempo real:
 ```
-cabal run
+cabal run qbarchallenge -- visual
 ```
 
-Para aumentar o número de iterações e ver o agente aprender melhor, edite a linha em `Main.hs`:
+**Modo Terminal** — roda 1000 iterações e imprime cada passo na tela:
+```
+cabal run qbarchallenge -- terminal
+```
+
+Se nenhum argumento for passado, o programa exibe as opções disponíveis:
+```
+cabal run qbarchallenge
+```
+
+---
+
+### Ajustando a velocidade de aprendizado (Modo Visual)
+
+No arquivo `Visual.hs`, a variável `passosPorFrame` controla quantas iterações de Q-learning ocorrem por quadro:
 
 ```haskell
-replicateM_ 10000 loopDeJogo  -- altere 1000 para 10000 (ou mais)
+passosPorFrame :: Int
+passosPorFrame = 10  -- aumente para aprender mais rápido
 ```
+
+| Valor | Efeito |
+|-------|--------|
+| `1`   | Animação fluida, aprendizado lento |
+| `10`  | Equilíbrio entre fluidez e velocidade (padrão) |
+| `50`  | Aprendizado rápido, animação um pouco travada |
+| `100` | Aprendizado muito rápido, bola "pula" posições |
 
 ---
 

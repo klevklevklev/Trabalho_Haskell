@@ -1,33 +1,25 @@
 module Main where
 
-import Control.Monad.State
-import Control.Monad (replicateM_)
 import Numeric.LinearAlgebra (konst)
-import Text.Printf (printf)
-import Types
-import Physics
-import Brain
 import System.Random
+import System.Environment (getArgs)
+import Types
+import Visual
+import Terminal
+
+mundoInicial :: StdGen -> Mundo
+mundoInicial g = Mundo
+    (Campo (5, 5) (0.1, -0.2) 5 0)
+    (CraqueState (konst 0.0 5) 0.1 0.01 0.95 g)
 
 main :: IO ()
 main = do
-    putStrLn "--- Q-Bar Challenge: Início do Treino ---"
-    g <- newStdGen
-    let craqueInicial = CraqueState (konst 0.0 5) 0.1 0.01 0.95 g
-    let mundoInicial  = Mundo (Campo (5,5) (0.1, -0.2) 5 0) craqueInicial
-    
-    final <- execStateT (replicateM_ 1000 loopDeJogo) mundoInicial
-    print (pesos $ craque final)
-
-loopDeJogo :: Jogo ()
-loopDeJogo = do
-    m <- get
-    let s = campo m
-    a <- escolherAcao
-    let (s', r) = proximoEstado s a
-    
-    treinar s a r s' -- O Treinador atualiza o craque
-    modify (\mundo -> mundo { campo = s' })
-    
-    let (bx, by) = bolaPos s'
-    liftIO $ printf "Bola em: (%.2f, %.2f) | Reward: %.2f\n" bx by r
+    args <- getArgs
+    g    <- newStdGen
+    case args of
+        ["visual"  ] -> rodarVisual   (mundoInicial g)
+        ["terminal"] -> rodarTerminal (mundoInicial g)
+        _            -> do
+            putStrLn "Uso: cabal run qbarchallenge -- <modo>"
+            putStrLn "  visual    → abre janela gráfica com Gloss"
+            putStrLn "  terminal  → roda no terminal com saída de texto"
