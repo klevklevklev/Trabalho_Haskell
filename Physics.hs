@@ -2,24 +2,51 @@ module Physics where
 
 import Types
 
--- | Calcula a física da bola e colisão com a barrinha
 proximoEstado :: Campo -> Jogada -> (Campo, Double)
-proximoEstado c acao = 
+proximoEstado c acao =
     let (bx, by) = bolaPos c
         (vx, vy) = bolaVel c
         novaBarraX = aplicarMovimento (barraX c) acao
-        -- Integração física simples (Euler)
-        novaBolaPos = (bx + vx, by + vy)
-        recompensa = calcularRecompensa c novaBolaPos novaBarraX
-    in (c { bolaPos = novaBolaPos, barraX = novaBarraX }, recompensa)
+
+        -- Move a bola
+        bx1 = bx + vx
+        by1 = by + vy
+
+        -- Rebate nas paredes laterais (x: 0 a 10)
+        (bx2, vx2)
+            | bx1 < 0  = (-bx1,     -vx)
+            | bx1 > 10 = (20 - bx1, -vx)
+            | otherwise = (bx1, vx)
+
+        -- Rebate na parede superior (y = 10)
+        (by2, vy2)
+            | by1 > 10 = (20 - by1, -vy)
+            | otherwise = (by1, vy)
+
+        -- Interação com a barrinha (y <= 0)
+        defended = by2 <= 0 && abs (bx2 - novaBarraX) < 1.0
+        gol      = by2 <= 0 && not defended
+
+        recompensa
+            | defended  =  10.0
+            | gol       = -100.0
+            | otherwise =  -1.0
+
+        -- Defesa: rebate a bola pra cima; Gol: reseta ao centro
+        (bolaPosFinal, bolaVelFinal, golsNovos)
+            | defended  = ((bx2, 0), (vx2, abs vy2), gols c)
+            | gol       = ((5,   5), (0.1, abs vy),  gols c + 1)
+            | otherwise = ((bx2, by2), (vx2, vy2),   gols c)
+
+    in ( c { bolaPos = bolaPosFinal
+           , bolaVel = bolaVelFinal
+           , barraX  = novaBarraX
+           , gols    = golsNovos
+           }
+       , recompensa
+       )
 
 aplicarMovimento :: Double -> Jogada -> Double
-aplicarMovimento x Esquerda = max 0 (x - 0.5)
+aplicarMovimento x Esquerda = max 0  (x - 0.5)
 aplicarMovimento x Direita  = min 10 (x + 0.5)
 aplicarMovimento x _        = x
-
-calcularRecompensa :: Campo -> (Double, Double) -> Double -> Double
-calcularRecompensa _ (_, by) bX 
-    | by <= 0 && abs (fst (bolaPos _) - bX) < 1.0 = 10.0  -- Defesa: +10 pontos
-    | by < -0.5 = -100.0                                 -- Gol Sofrido: -100 pontos
-    | otherwise = -1.0                                   -- Penalidade 

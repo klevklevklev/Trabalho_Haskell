@@ -1,6 +1,9 @@
 module Main where
 
 import Control.Monad.State
+import Control.Monad (replicateM_)
+import Numeric.LinearAlgebra (konst)
+import Text.Printf (printf)
 import Types
 import Physics
 import Brain
@@ -26,4 +29,5 @@ loopDeJogo = do
     treinar s a r s' -- O Treinador atualiza o craque
     modify (\mundo -> mundo { campo = s' })
     
-    liftIO $ putStrLn $ "Bola em: " ++ show (bolaPos s') ++ " | Reward: " ++ show r
+    let (bx, by) = bolaPos s'
+    liftIO $ printf "Bola em: (%.2f, %.2f) | Reward: %.2f\n" bx by r

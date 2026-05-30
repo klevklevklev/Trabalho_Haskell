@@ -4,6 +4,7 @@ import Types
 import Numeric.LinearAlgebra
 import System.Random
 import Control.Monad.State
+import Data.List (maximumBy)
 
 -- | Etapa 2: Extração de Features (φ)
 extrairFeatures :: Campo -> Jogada -> Vector Double
@@ -21,12 +22,16 @@ escolherAcao :: Jogo Jogada
 escolherAcao = do
     m <- get
     let cState = craque m
-    let (prob, novoGen) = randomR (0.0, 1.0) (gen cState)
-    put m { craque = cState { gen = novoGen } }
-    
+    let (prob, g1) = randomR (0.0, 1.0) (gen cState)
+
     if prob < epsilon cState
-        then return $ toEnum (fst $ randomR (0, 2) novoGen) -- Exploração
-        else return $ acaoGulosa (campo m) (pesos cState) -- Explotação
+        then do
+            let (idx, g2) = randomR (0 :: Int, 2) g1
+            put m { craque = cState { gen = g2 } }
+            return $ toEnum idx                          -- Exploração
+        else do
+            put m { craque = cState { gen = g1 } }
+            return $ acaoGulosa (campo m) (pesos cState) -- Explotação
 
 acaoGulosa :: Campo -> Vector Double -> Jogada
 acaoGulosa c theta = 

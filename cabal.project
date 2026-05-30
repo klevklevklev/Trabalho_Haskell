@@ -1,0 +1,6 @@
+packages: .
+
+package hmatrix
+  flags: +openblas
+  extra-lib-dirs: C:\ghcup\msys64\mingw64\lib
+  extra-include-dirs: C:\ghcup\msys64\mingw64\include
